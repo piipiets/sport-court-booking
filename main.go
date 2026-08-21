@@ -23,12 +23,15 @@ func main() {
 
 	// repository
 	userRepository := repository.NewUserRepository(conn)
+	courtRepository := repository.NewCourtRepository(conn)
 
 	// service
 	userService := service.NewUserService(userRepository)
+	courtService := service.NewCourtService(courtRepository)
 
 	// handler
 	userHandler := handler.NewUserHandler(userService)
+	courtHandler := handler.NewCourtHandler(courtService)
 
 	// router
 	router := gin.Default()
@@ -37,6 +40,7 @@ func main() {
 	routes.SetupRoutes(
 		router,
 		userHandler,
+		courtHandler,
 	)
 
 	router.Run(":8080")

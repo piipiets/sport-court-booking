@@ -7,20 +7,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/piipiets/sport-court-booking/helpers/constant"
 	"github.com/piipiets/sport-court-booking/model/entity"
-)
-
-// Error definitions
-var (
-	ErrUserNotFound = errors.New("user not found")
-	ErrEmailExists  = errors.New("email already registered")
 )
 
 // Repository interface
 type Repository interface {
 	SignUp(ctx context.Context, user entity.User) error
 	GetUserByEmail(ctx context.Context, email string) (entity.User, error)
-	CheckEmailExists(ctx context.Context, email string) (bool, error)
 }
 
 type userRepository struct {
@@ -49,10 +43,7 @@ func (r *userRepository) SignUp(ctx context.Context, user entity.User) error {
 	).Scan(&userID)
 
 	if err != nil {
-		if isDuplicateKeyError(err) {
-			return ErrEmailExists
-		}
-		return fmt.Errorf("failed to create user: %w", err)
+		return err
 	}
 
 	return nil
@@ -68,43 +59,10 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (enti
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return entity.User{}, ErrUserNotFound
+			return entity.User{}, constant.ErrUserNotFound
 		}
 		return entity.User{}, fmt.Errorf("failed to get user by email: %w", err)
 	}
 
 	return user, nil
-}
-
-// CheckEmailExists checks if email already registered
-func (r *userRepository) CheckEmailExists(ctx context.Context, email string) (bool, error) {
-	var exists bool
-	query := `SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)`
-
-	err := r.db.QueryRowContext(ctx, query, email).Scan(&exists)
-	if err != nil {
-		return false, fmt.Errorf("failed to check email existence: %w", err)
-	}
-
-	return exists, nil
-}
-
-// isDuplicateKeyError checks if error is duplicate key violation
-func isDuplicateKeyError(err error) bool {
-	errMsg := err.Error()
-	return containsAny(errMsg, []string{
-		"duplicate key",
-		"Duplicate entry",
-		"UNIQUE constraint failed",
-		"unique constraint",
-	})
-}
-
-func containsAny(s string, substrs []string) bool {
-	for _, substr := range substrs {
-		if len(s) >= len(substr) && s[:len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
