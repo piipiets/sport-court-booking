@@ -10,10 +10,10 @@ import (
 )
 
 type UserHandler struct {
-	service service.Service
+	service service.UserService
 }
 
-func NewUserHandler(service service.Service) *UserHandler {
+func NewUserHandler(service service.UserService) *UserHandler {
 	return &UserHandler{
 		service: service,
 	}
@@ -24,7 +24,8 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		fmt.Println("Bind error:", err)
-		common.GenerateErrorResponse(c, "invalid request body")
+		message := common.GetValidationError(err)
+		common.GenerateErrorResponse(c, message)
 		return
 	}
 
@@ -40,4 +41,23 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 
 	common.GenerateSuccessResponseWithData(c, "login successful", result)
+}
+
+func (h *UserHandler) SignUp(c *gin.Context) {
+	var req request.SignUpRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		fmt.Println("Bind error:", err)
+		message := common.GetValidationError(err)
+		common.GenerateErrorResponse(c, message)
+		return
+	}
+
+	err := h.service.SignUp(c.Request.Context(), req)
+	if err != nil {
+		common.GenerateErrorResponse(c, err.Error())
+		return
+	}
+
+	common.GenerateSuccessResponse(c, "login successful")
 }

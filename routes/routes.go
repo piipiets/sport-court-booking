@@ -10,4 +10,5 @@ func SetupRoutes(
 	userHandler *handler.UserHandler,
 ) {
 	router.POST("/login", userHandler.Login)
+	router.POST("/sign-up", userHandler.SignUp)
 }

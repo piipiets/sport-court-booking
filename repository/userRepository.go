@@ -18,7 +18,7 @@ var (
 
 // Repository interface
 type Repository interface {
-	SignUp(ctx context.Context, user entity.User) (entity.User, error)
+	SignUp(ctx context.Context, user entity.User) error
 	GetUserByEmail(ctx context.Context, email string) (entity.User, error)
 	CheckEmailExists(ctx context.Context, email string) (bool, error)
 }
@@ -34,7 +34,7 @@ func NewUserRepository(db *sql.DB) Repository {
 }
 
 // SignUp creates a new user
-func (r *userRepository) SignUp(ctx context.Context, user entity.User) (entity.User, error) {
+func (r *userRepository) SignUp(ctx context.Context, user entity.User) error {
 	var userID int64
 
 	queryInsertUser := `INSERT INTO users (email, name, password, role, created_at) 
@@ -50,13 +50,12 @@ func (r *userRepository) SignUp(ctx context.Context, user entity.User) (entity.U
 
 	if err != nil {
 		if isDuplicateKeyError(err) {
-			return entity.User{}, ErrEmailExists
+			return ErrEmailExists
 		}
-		return entity.User{}, fmt.Errorf("failed to create user: %w", err)
+		return fmt.Errorf("failed to create user: %w", err)
 	}
 
-	user.ID = userID
-	return user, nil
+	return nil
 }
 
 // GetUserByEmail retrieves user by email
