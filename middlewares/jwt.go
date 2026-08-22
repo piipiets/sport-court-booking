@@ -2,16 +2,21 @@ package middlewares
 
 import (
 	"errors"
+	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/piipiets/sport-court-booking/helpers/common"
+	"github.com/piipiets/sport-court-booking/model/entity"
 	"github.com/spf13/viper"
 )
 
 type Claims struct {
+	UserID int64
+	Email  string
+	Role   string
 	jwt.RegisteredClaims
 }
 
@@ -19,7 +24,7 @@ func JwtMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString, err := GetJwtTokenFromHeader(c)
 		if err != nil {
-			common.GenerateErrorResponse(c, err.Error())
+			common.GenerateErrorResponse(c, err.Error(), http.StatusUnauthorized)
 			c.Abort()
 			return
 		}
@@ -36,13 +41,13 @@ func JwtMiddleware() gin.HandlerFunc {
 		)
 
 		if err != nil {
-			common.GenerateErrorResponse(c, "token invalid or expired")
+			common.GenerateErrorResponse(c, "token invalid or expired", http.StatusUnauthorized)
 			c.Abort()
 			return
 		}
 
 		if !token.Valid {
-			common.GenerateErrorResponse(c, "token invalid")
+			common.GenerateErrorResponse(c, "token invalid", http.StatusUnauthorized)
 			c.Abort()
 			return
 		}
@@ -50,7 +55,7 @@ func JwtMiddleware() gin.HandlerFunc {
 		// Ambil claims dari token
 		claims, ok := token.Claims.(*Claims)
 		if !ok {
-			common.GenerateErrorResponse(c, "invalid token claims")
+			common.GenerateErrorResponse(c, "invalid token claims", http.StatusUnauthorized)
 			c.Abort()
 			return
 		}
@@ -78,10 +83,13 @@ func GetJwtTokenFromHeader(c *gin.Context) (tokenString string, err error) {
 	return parts[1], nil
 }
 
-func GenerateJwtToken() (token string, err error) {
-	expirationTime := time.Now().Add(1 * time.Minute)
+func GenerateJwtToken(user entity.User) (token string, err error) {
+	expirationTime := time.Now().Add(10 * time.Minute)
 
 	claims := &Claims{
+		UserID: user.ID,
+		Email:  user.Email,
+		Role:   user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

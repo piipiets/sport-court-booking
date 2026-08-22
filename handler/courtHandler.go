@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,7 @@ func (h *CourtHandler) GetAll(c *gin.Context) {
 	courts, err := h.courtService.GetAll()
 	if err != nil {
 		fmt.Println("Error : ", err)
-		common.GenerateErrorResponse(c, "failed to fetch courts")
+		common.GenerateErrorResponse(c, "failed to fetch courts", http.StatusBadRequest)
 		return
 	}
 
@@ -34,17 +35,17 @@ func (h *CourtHandler) GetAll(c *gin.Context) {
 func (h *CourtHandler) GetByID(c *gin.Context) {
 	id, err := parseCourtID(c)
 	if err != nil {
-		common.GenerateErrorResponse(c, err.Error())
+		common.GenerateErrorResponse(c, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	court, err := h.courtService.GetByID(id)
 	if errors.Is(err, constant.ErrCourtNotFound) {
-		common.GenerateErrorResponse(c, "court not found")
+		common.GenerateErrorResponse(c, "court not found", http.StatusNotFound)
 		return
 	}
 	if err != nil {
-		common.GenerateErrorResponse(c, "failed to fetch court")
+		common.GenerateErrorResponse(c, "failed to fetch court", http.StatusInternalServerError)
 		return
 	}
 
@@ -54,13 +55,13 @@ func (h *CourtHandler) GetByID(c *gin.Context) {
 func (h *CourtHandler) Create(c *gin.Context) {
 	var req request.CourtRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.GenerateErrorResponse(c, err.Error())
+		common.GenerateErrorResponse(c, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err := h.courtService.Create(req)
 	if err != nil {
-		common.GenerateErrorResponse(c, "failed to create court")
+		common.GenerateErrorResponse(c, "failed to create court", http.StatusInternalServerError)
 		return
 	}
 
@@ -70,24 +71,24 @@ func (h *CourtHandler) Create(c *gin.Context) {
 func (h *CourtHandler) Update(c *gin.Context) {
 	id, err := parseCourtID(c)
 	if err != nil {
-		common.GenerateErrorResponse(c, err.Error())
+		common.GenerateErrorResponse(c, err.Error(), http.StatusBadGateway)
 		return
 	}
 
 	var req request.UpdateCourtRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.GenerateErrorResponse(c, err.Error())
+		common.GenerateErrorResponse(c, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err = h.courtService.Update(id, req)
 	if errors.Is(err, constant.ErrCourtNotFound) {
-		common.GenerateErrorResponse(c, "court not found")
+		common.GenerateErrorResponse(c, "court not found", http.StatusNotFound)
 		return
 	}
 
 	if err != nil {
-		common.GenerateErrorResponse(c, "failed to update court")
+		common.GenerateErrorResponse(c, "failed to update court", http.StatusInternalServerError)
 		return
 	}
 
@@ -97,18 +98,18 @@ func (h *CourtHandler) Update(c *gin.Context) {
 func (h *CourtHandler) Delete(c *gin.Context) {
 	id, err := parseCourtID(c)
 	if err != nil {
-		common.GenerateErrorResponse(c, err.Error())
+		common.GenerateErrorResponse(c, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err = h.courtService.Delete(id)
 	if errors.Is(err, constant.ErrCourtNotFound) {
-		common.GenerateErrorResponse(c, "court not found")
+		common.GenerateErrorResponse(c, "court not found", http.StatusNotFound)
 		return
 	}
 
 	if err != nil {
-		common.GenerateErrorResponse(c, "failed to delete court")
+		common.GenerateErrorResponse(c, "failed to delete court", http.StatusInternalServerError)
 		return
 	}
 

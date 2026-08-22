@@ -10,12 +10,6 @@ type APIResponse struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
-	AdditionalInfo
-}
-
-type AdditionalInfo struct {
-	TotalData int64  `json:"total_data"`
-	TraceId   string `json:"trace_id"`
 }
 
 func GenerateSuccessResponse(ctx *gin.Context, message string) {
@@ -32,16 +26,9 @@ func GenerateSuccessResponseWithData(ctx *gin.Context, message string, data inte
 	)
 }
 
-func GenerateSuccessResponseWithListData(ctx *gin.Context, message string, total int64, data interface{}) {
-	ctx.JSON(
-		http.StatusOK,
-		GenerateSuccessMessageWithListData(message, total, data),
-	)
-}
-
-func GenerateErrorResponse(ctx *gin.Context, message string) {
+func GenerateErrorResponse(ctx *gin.Context, message string, httpStatusCode int) {
 	ctx.AbortWithStatusJSON(
-		http.StatusBadRequest,
+		httpStatusCode,
 		GenerateErrorMessage(message),
 	)
 }
@@ -59,17 +46,6 @@ func GenerateSuccessMessageWithData(message string, data interface{}) APIRespons
 		Success: true,
 		Message: message,
 		Data:    data,
-	}
-}
-
-func GenerateSuccessMessageWithListData(message string, total int64, data interface{}) APIResponse {
-	return APIResponse{
-		Success: true,
-		Message: message,
-		Data:    data,
-		AdditionalInfo: AdditionalInfo{
-			TotalData: total,
-		},
 	}
 }
 

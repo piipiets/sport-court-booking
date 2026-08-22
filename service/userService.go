@@ -51,14 +51,14 @@ func (s *userService) Login(ctx context.Context, req request.LoginRequest) (resp
 	}
 
 	// Generate JWT token
-	jwtToken, err := middlewares.GenerateJwtToken()
+	jwtToken, err := middlewares.GenerateJwtToken(user)
 	if err != nil {
 		return response.LoginResponse{}, fmt.Errorf("failed to generate token: %w", err)
 	}
 
 	return response.LoginResponse{
 		Token:     jwtToken,
-		ExpiredAt: time.Now().Add(1 * time.Minute),
+		ExpiredAt: time.Now().Add(10 * time.Minute),
 	}, nil
 }
 

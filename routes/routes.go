@@ -10,6 +10,7 @@ func SetupRoutes(
 	router *gin.Engine,
 	userHandler *handler.UserHandler,
 	courtHandler *handler.CourtHandler,
+	bookHandler *handler.BookingHandler,
 ) {
 	router.POST("/login", userHandler.Login)
 	router.POST("/sign-up", userHandler.SignUp)
@@ -22,5 +23,14 @@ func SetupRoutes(
 		api.GET("/:id", courtHandler.GetByID)
 		api.PUT("/:id", courtHandler.Update)
 		api.DELETE("/:id", courtHandler.Delete)
+	}
+
+	book := router.Group("/api/bookings")
+	book.Use(middlewares.JwtMiddleware())
+	{
+		book.POST("", bookHandler.Create)
+		book.GET("", bookHandler.GetAll)
+		book.GET("/:id", bookHandler.GetByID)
+		book.PUT("/status/:id", bookHandler.UpdateStatus)
 	}
 }
