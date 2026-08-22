@@ -25,16 +25,19 @@ func main() {
 	userRepository := repository.NewUserRepository(conn)
 	courtRepository := repository.NewCourtRepository(conn)
 	bookingRepository := repository.NewBookingRepository(conn)
+	paymentRepository := repository.NewPaymentRepository(conn)
 
 	// service
 	userService := service.NewUserService(userRepository)
 	courtService := service.NewCourtService(courtRepository)
 	bookingService := service.NewBookingService(bookingRepository, courtRepository)
+	paymentService := service.NewPaymentService(paymentRepository, bookingRepository)
 
 	// handler
 	userHandler := handler.NewUserHandler(userService)
 	courtHandler := handler.NewCourtHandler(courtService)
 	bookingHandler := handler.NewBookingHandler(bookingService)
+	paymentHandler := handler.NewPaymentHandler(paymentService)
 
 	// router
 	router := gin.Default()
@@ -45,6 +48,7 @@ func main() {
 		userHandler,
 		courtHandler,
 		bookingHandler,
+		paymentHandler,
 	)
 
 	router.Run(":8080")

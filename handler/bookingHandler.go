@@ -10,7 +10,6 @@ import (
 	"github.com/piipiets/sport-court-booking/helpers/constant"
 	"github.com/piipiets/sport-court-booking/middlewares"
 	"github.com/piipiets/sport-court-booking/model/dto/request"
-	"github.com/piipiets/sport-court-booking/repository"
 	"github.com/piipiets/sport-court-booking/service"
 )
 
@@ -37,7 +36,7 @@ func (h *BookingHandler) Create(c *gin.Context) {
 	}
 
 	err = h.bookingService.Create(userID, req)
-	if errors.Is(err, repository.ErrBookingConflict) {
+	if errors.Is(err, constant.ErrBookingConflict) {
 		common.GenerateErrorResponse(c, err.Error(), http.StatusConflict)
 		return
 	}
@@ -86,7 +85,7 @@ func (h *BookingHandler) GetByID(c *gin.Context) {
 	isAdmin := isAdminFromContext(c)
 
 	booking, err := h.bookingService.GetByID(id, userID, isAdmin)
-	if errors.Is(err, repository.ErrBookingNotFound) {
+	if errors.Is(err, constant.ErrBookingNotFound) {
 		common.GenerateErrorResponse(c, "booking not found", http.StatusNotFound)
 		return
 	}
@@ -123,7 +122,7 @@ func (h *BookingHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	err = h.bookingService.UpdateStatus(id, req)
-	if errors.Is(err, repository.ErrBookingNotFound) {
+	if errors.Is(err, constant.ErrBookingNotFound) {
 		common.GenerateErrorResponse(c, "booking not found", http.StatusNotFound)
 		return
 	}

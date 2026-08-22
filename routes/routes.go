@@ -11,6 +11,7 @@ func SetupRoutes(
 	userHandler *handler.UserHandler,
 	courtHandler *handler.CourtHandler,
 	bookHandler *handler.BookingHandler,
+	paymentHandler *handler.PaymentHandler,
 ) {
 	router.POST("/login", userHandler.Login)
 	router.POST("/sign-up", userHandler.SignUp)
@@ -32,5 +33,13 @@ func SetupRoutes(
 		book.GET("", bookHandler.GetAll)
 		book.GET("/:id", bookHandler.GetByID)
 		book.PUT("/status/:id", bookHandler.UpdateStatus)
+	}
+
+	payment := router.Group("/api/payments")
+	payment.Use(middlewares.JwtMiddleware())
+	{
+		payment.POST("", paymentHandler.Create)
+		payment.GET("/:booking_id", paymentHandler.GetByBookingID)
+		payment.GET("", paymentHandler.GetAllPaymentByUserId)
 	}
 }

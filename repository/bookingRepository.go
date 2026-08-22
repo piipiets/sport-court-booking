@@ -4,12 +4,8 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/piipiets/sport-court-booking/helpers/constant"
 	"github.com/piipiets/sport-court-booking/model/entity"
-)
-
-var (
-	ErrBookingNotFound = errors.New("booking not found")
-	ErrBookingConflict = errors.New("booking conflicts with an existing schedule on this court")
 )
 
 type BookingRepository interface {
@@ -49,7 +45,7 @@ func (r *bookingRepository) Create(booking *entity.Bookings) error {
 	`, booking.CourtID, booking.BookingDate, booking.StartTime, booking.EndTime).Scan(&conflictID)
 
 	if err == nil {
-		return ErrBookingConflict
+		return constant.ErrBookingConflict
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return err
@@ -97,7 +93,7 @@ func (r *bookingRepository) FindByBookingID(id int64) (*entity.Bookings, error) 
 	)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, ErrBookingNotFound
+		return nil, constant.ErrBookingNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -153,7 +149,7 @@ func (r *bookingRepository) UpdateStatusBooking(id int64, status string) error {
 	}
 
 	if rowsAffected == 0 {
-		return ErrBookingNotFound
+		return constant.ErrBookingNotFound
 	}
 
 	return nil
