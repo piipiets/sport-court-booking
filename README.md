@@ -1,12 +1,23 @@
 # Sport Court Booking
 
-## Project Description
+REST API for managing sport courts, bookings, and payment records.
 
-Sport Court Booking is a RESTful API for managing sport courts, customer bookings, and booking payments. Users can create accounts, authenticate with JWT, browse and manage courts, create bookings, and record payments. Administrators can update booking statuses and access resources according to the authorization rules implemented by the API.
+## Live URL
 
-The service runs locally on `http://localhost:8080` by default. It can be deployed as a Go serverless function on Vercel.
+- Production: https://sport-court-booking-six.vercel.app
+- Local: http://localhost:8080
 
-## Technology Stack
+## Project Overview
+
+This project is built with Go and Gin. It provides:
+
+- user authentication with JWT
+- court management
+- booking creation and status updates
+- payment recording and lookup
+- automatic PostgreSQL migration on startup
+
+## Tech Stack
 
 - **Language:** Go `1.25.0`
 - **Web framework:** Gin `1.12.0`
@@ -20,7 +31,7 @@ The service runs locally on `http://localhost:8080` by default. It can be deploy
 ## Folder Structure
 
 ```text
-.
+├── api/                     # Vercel serverless entry point
 ├── configs/                 # Environment and application configuration
 ├── databases/
 │   ├── connection/          # PostgreSQL connection setup
@@ -66,20 +77,6 @@ Start the service with:
 go run .
 ```
 
-## Deploy to Vercel
-
-Create a Vercel project from this repository and use the default settings. Vercel detects `api/index.go` as the serverless entry point and `vercel.json` forwards all routes to it.
-
-Set these environment variables in the Vercel project settings:
-
-```env
-DATABASE_URL=<POSTGRES_CONNECTION_URL>
-DB_ENGINE=postgres
-jwt_secret_key=<JWT_SECRET>
-```
-
-The PostgreSQL database must be hosted on a service reachable from Vercel. Database migrations run when the function instance initializes. Because Vercel functions are serverless, do not use `go run .` as the Vercel start command.
-
 ## Available APIs
 
 All paths are relative to `<API_BASE_URL>`. Unless marked **Public**, an endpoint requires a valid JWT bearer token.
@@ -123,5 +120,3 @@ Supported booking statuses are `confirmed`, `cancelled`, and `completed`.
 | `GET` | `/api/payments` | JWT | List payments for the authenticated user | None |
 
 Supported payment methods are `cash`, `transfer`, and `qris`.
-
-> Request and response formats may evolve with the DTOs in `model/dto/request` and `model/dto/response`. Add `<REQUEST_EXAMPLE>` and `<RESPONSE_EXAMPLE>` here when an API contract is formally defined.
