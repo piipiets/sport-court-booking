@@ -1,21 +1,11 @@
 # Sport Court Booking
 
-REST API for managing sport courts, bookings, and payment records.
+Sport Court Booking is a RESTful API for managing sport courts, customer bookings, and booking payments. Users can create accounts, authenticate with JWT, browse and manage courts, create bookings, and record payments. Administrators can update booking statuses and access resources according to the authorization rules implemented by the API.
 
 ## Live URL
 
 - Production: https://sport-court-booking-six.vercel.app
 - Local: http://localhost:8080
-
-## Project Overview
-
-This project is built with Go and Gin. It provides:
-
-- user authentication with JWT
-- court management
-- booking creation and status updates
-- payment recording and lookup
-- automatic PostgreSQL migration on startup
 
 ## Tech Stack
 
