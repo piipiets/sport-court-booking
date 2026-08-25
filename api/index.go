@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"sync"
 
@@ -16,21 +18,25 @@ import (
 )
 
 var (
-	router    *gin.Engine
-	initOnce  sync.Once
-	initPanic any
+	router   *gin.Engine
+	initOnce sync.Once
+	initErr  error
 )
 
 func Handler(writer http.ResponseWriter, request *http.Request) {
 	initOnce.Do(func() {
 		defer func() {
-			initPanic = recover()
+			if recovered := recover(); recovered != nil {
+				initErr = fmt.Errorf("initialize application: %v", recovered)
+			}
 		}()
 		router = buildRouter()
 	})
 
-	if initPanic != nil {
-		panic(initPanic)
+	if initErr != nil {
+		log.Printf("Vercel function initialization failed: %v", initErr)
+		http.Error(writer, "Internal server configuration error", http.StatusInternalServerError)
+		return
 	}
 
 	router.ServeHTTP(writer, request)

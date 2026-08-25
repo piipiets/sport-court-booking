@@ -13,9 +13,16 @@ func Initiator() {
 	// =========================
 	viper.AutomaticEnv()
 
-	viper.BindEnv("DATABASE_URL")
-	viper.BindEnv("DB_ENGINE")
-	viper.BindEnv("jwt_secret_key")
+	if err := viper.BindEnv("DATABASE_URL", "DATABASE_URL", "POSTGRES_URL"); err != nil {
+		panic(err)
+	}
+	if err := viper.BindEnv("DB_ENGINE", "DB_ENGINE"); err != nil {
+		panic(err)
+	}
+	if err := viper.BindEnv("jwt_secret_key", "JWT_SECRET_KEY", "jwt_secret_key"); err != nil {
+		panic(err)
+	}
+	viper.SetDefault("DB_ENGINE", "postgres")
 
 	// =========================
 	// 2. Try read .env

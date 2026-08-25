@@ -57,7 +57,7 @@ Required configuration values:
 ```env
 DATABASE_URL=<POSTGRES_CONNECTION_URL>
 DB_ENGINE=postgres
-jwt_secret_key=<JWT_SECRET>
+JWT_SECRET_KEY=<JWT_SECRET>
 ```
 
 Start the service with:
