@@ -67,6 +67,114 @@ Start the service with:
 go run .
 ```
 
+## Database Structure
+
+The project uses PostgreSQL with migration files under `databases/migration/sql_migration/`. The schema includes the core booking flow: users, courts, bookings, payments, and review records.
+
+### `users`
+
+Stores system users and their roles.
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `BIGSERIAL` | Auto-increment primary key for each user. |
+| `name` | `VARCHAR(150)` | Full name of the user. Required. |
+| `email` | `VARCHAR(255)` | Unique email address used for login and identity. Required. |
+| `password` | `VARCHAR(255)` | Hashed password value. Required. |
+| `role` | `VARCHAR(20)` | User role. Allowed values: `user`, `admin`. Default is `user`. |
+| `created_at` | `TIMESTAMPTZ` | Account creation timestamp. Automatically set with `now()`. |
+
+Constraints:
+- `email` is unique.
+- `role` is restricted to `user` or `admin`.
+
+### `courts`
+
+Stores sport court information.
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `BIGSERIAL` | Auto-increment primary key for each court. |
+| `name` | `VARCHAR(150)` | Court name. Required. |
+| `type` | `VARCHAR(50)` | Court category or type, such as `futsal`, `badminton`, or other configured values. |
+| `price_per_hour` | `NUMERIC(12, 2)` | Hourly rental price. Must be greater than or equal to `0`. |
+| `location` | `VARCHAR(255)` | Court location/address. Required. |
+| `created_at` | `TIMESTAMPTZ` | Creation timestamp. Automatically set with `now()`. |
+
+Constraints:
+- `price_per_hour` cannot be negative.
+
+### `bookings`
+
+Records a reservation made by a user for a specific court.
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `BIGSERIAL` | Auto-increment primary key for each booking. |
+| `user_id` | `BIGINT` | Foreign key to `users.id`. Indicates the booking owner. |
+| `court_id` | `BIGINT` | Foreign key to `courts.id`. Indicates the reserved court. |
+| `booking_date` | `DATE` | Booking date. Required. |
+| `start_time` | `TIME` | Start time of the booking. Required. |
+| `end_time` | `TIME` | End time of the booking. Required. Must be later than `start_time`. |
+| `status` | `VARCHAR(20)` | Current booking status. Allowed values: `pending`, `confirmed`, `cancelled`, `completed`. Default: `pending`. |
+| `total_price` | `NUMERIC(12, 2)` | Total cost of the reservation. Must be greater than or equal to `0`. |
+| `payment_deadline` | `TIMESTAMPTZ` | Payment due date/time for the booking. |
+| `created_at` | `TIMESTAMPTZ` | Booking creation timestamp. Automatically set with `now()`. |
+
+Constraints:
+- `user_id` references `users(id)` with cascade delete.
+- `court_id` references `courts(id)` with restrict delete.
+- `end_time > start_time` must hold.
+
+### `payments`
+
+Stores payment records linked to a booking.
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `BIGSERIAL` | Auto-increment primary key for each payment. |
+| `booking_id` | `BIGINT` | Unique foreign key to `bookings.id`. A booking can only have one payment record. |
+| `amount` | `NUMERIC(12, 2)` | Paid amount. Must be greater than or equal to `0`. |
+| `method` | `VARCHAR(20)` | Payment method. Allowed values: `cash`, `transfer`, `qris`. |
+| `status` | `VARCHAR(20)` | Payment state. Allowed values: `unpaid`, `paid`, `refunded`. Default: `unpaid`. |
+| `paid_at` | `TIMESTAMPTZ` | Timestamp when the payment was completed. Nullable until paid. |
+
+Constraints:
+- `booking_id` is unique.
+- `booking_id` references `bookings(id)` with cascade delete.
+
+### `reviews`
+
+Stores a user review for a completed booking.
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `BIGSERIAL` | Auto-increment primary key for each review. |
+| `booking_id` | `BIGINT` | Foreign key to `bookings.id`. One booking can only be reviewed once. |
+| `user_id` | `BIGINT` | Foreign key to `users.id`. Indicates the reviewer. |
+| `rating` | `SMALLINT` | Rating score from `1` to `5`. |
+| `comment` | `TEXT` | Optional review text/content. |
+| `created_at` | `TIMESTAMPTZ` | Review creation timestamp. Automatically set with `now()`. |
+
+Constraints:
+- `rating` must be between `1` and `5`.
+- Each `booking_id` appears only once in the table.
+
+### Relationship Summary
+
+```text
+users ──< bookings >── courts
+  │                 │
+  │                 └──< payments
+  │
+  └──< reviews
+```
+
+- One user can create many bookings.
+- One court can have many bookings.
+- One booking can have one payment record.
+- One booking can have one review.
+
 ## Available APIs
 
 All paths are relative to `<API_BASE_URL>`. Unless marked **Public**, an endpoint requires a valid JWT bearer token.
