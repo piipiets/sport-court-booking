@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/piipiets/sport-court-booking/handler"
 	"github.com/piipiets/sport-court-booking/middlewares"
@@ -13,6 +16,24 @@ func SetupRoutes(
 	bookHandler *handler.BookingHandler,
 	paymentHandler *handler.PaymentHandler,
 ) {
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Sport Court Booking API",
+			"status":  "running",
+			"version": "1.0.0",
+			"endpoints": gin.H{
+				"auth": gin.H{
+					"login":  "POST /login",
+					"signup": "POST /sign-up",
+				},
+				"courts":   "/api/courts (with JWT)",
+				"bookings": "/api/bookings (with JWT)",
+				"payments": "/api/payments (with JWT)",
+			},
+			"timestamp": time.Now().Unix(),
+		})
+	})
+
 	router.POST("/login", userHandler.Login)
 	router.POST("/sign-up", userHandler.SignUp)
 
