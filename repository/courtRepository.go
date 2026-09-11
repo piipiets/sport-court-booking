@@ -14,6 +14,7 @@ type CourtRepository interface {
 	FindByID(id int64) (*entity.Courts, error)
 	Update(court *entity.Courts) error
 	Delete(id int64) error
+	UpdateImageURL(id int64, url *string) error
 }
 
 type courtRepository struct {
@@ -48,7 +49,7 @@ func (r *courtRepository) Create(court *entity.Courts) error {
 
 func (r *courtRepository) FindAll() ([]entity.Courts, error) {
 	query := `
-		SELECT id, name, type, price_per_hour, location, created_at
+		SELECT id, name, type, price_per_hour, location, image_url, created_at
 		FROM courts
 		ORDER BY created_at DESC
 	`
@@ -62,7 +63,7 @@ func (r *courtRepository) FindAll() ([]entity.Courts, error) {
 	courts := make([]entity.Courts, 0)
 	for rows.Next() {
 		var c entity.Courts
-		if err := rows.Scan(&c.ID, &c.Name, &c.Type, &c.Price, &c.Location, &c.CreatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.Name, &c.Type, &c.Price, &c.Location, &c.ImageURL, &c.CreatedAt); err != nil {
 			return nil, err
 		}
 		courts = append(courts, c)
@@ -77,14 +78,14 @@ func (r *courtRepository) FindAll() ([]entity.Courts, error) {
 
 func (r *courtRepository) FindByID(id int64) (*entity.Courts, error) {
 	query := `
-		SELECT id, name, type, price_per_hour, location, created_at
+		SELECT id, name, type, price_per_hour, location, image_url, created_at
 		FROM courts
 		WHERE id = $1
 	`
 
 	var c entity.Courts
 	err := r.db.QueryRow(query, id).Scan(
-		&c.ID, &c.Name, &c.Type, &c.Price, &c.Location, &c.CreatedAt,
+		&c.ID, &c.Name, &c.Type, &c.Price, &c.Location, &c.ImageURL, &c.CreatedAt,
 	)
 
 	if errors.Is(err, sql.ErrNoRows) {
@@ -100,9 +101,9 @@ func (r *courtRepository) FindByID(id int64) (*entity.Courts, error) {
 func (r *courtRepository) Update(court *entity.Courts) error {
 	query := `
 		UPDATE courts
-		SET name = $1, type = $2, price_per_hour = $3, location = $4
-		WHERE id = $5
-		RETURNING id, name, type, price_per_hour, location, created_at
+		SET name = $1, type = $2, price_per_hour = $3, location = $4, image_url = $5
+		WHERE id = $6
+		RETURNING id, name, type, price_per_hour, location, image_url, created_at
 	`
 
 	err := r.db.QueryRow(
@@ -111,14 +112,35 @@ func (r *courtRepository) Update(court *entity.Courts) error {
 		court.Type,
 		court.Price,
 		court.Location,
+		court.ImageURL,
 		court.ID,
-	).Scan(&court.ID, &court.Name, &court.Type, &court.Price, &court.Location, &court.CreatedAt)
+	).Scan(&court.ID, &court.Name, &court.Type, &court.Price, &court.Location, &court.ImageURL, &court.CreatedAt)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return constant.ErrCourtNotFound
 	}
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (r *courtRepository) UpdateImageURL(id int64, url *string) error {
+	query := `UPDATE courts SET image_url = $2 WHERE id = $1`
+
+	result, err := r.db.Exec(query, id, url)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return constant.ErrCourtNotFound
 	}
 
 	return nil

@@ -15,6 +15,7 @@ import (
 	"github.com/piipiets/sport-court-booking/repository"
 	"github.com/piipiets/sport-court-booking/routes"
 	"github.com/piipiets/sport-court-booking/service"
+	"github.com/piipiets/sport-court-booking/storage"
 )
 
 var (
@@ -55,7 +56,12 @@ func buildRouter() *gin.Engine {
 	paymentRepository := repository.NewPaymentRepository(conn)
 
 	userService := service.NewUserService(userRepository)
-	courtService := service.NewCourtService(courtRepository)
+	courtStorage := storage.NewStorageClient(
+		configs.SupabaseStorageURL(),
+		configs.SupabaseSecretKey(),
+		configs.SupabaseStorageBucket(),
+	)
+	courtService := service.NewCourtService(courtRepository, courtStorage)
 	bookingService := service.NewBookingService(bookingRepository, courtRepository)
 	paymentService := service.NewPaymentService(paymentRepository, bookingRepository)
 

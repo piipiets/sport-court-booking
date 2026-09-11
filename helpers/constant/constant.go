@@ -12,4 +12,5 @@ var (
 	ErrPaymentNotFound       = errors.New("payment not found")
 	ErrPaymentAlreadyExists  = errors.New("a payment already exists for this booking")
 	ErrPaymentAmountMismatch = errors.New("payment amount does not match booking total price")
+	ErrCourtImageNotFound    = errors.New("court image not found")
 )

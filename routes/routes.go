@@ -5,6 +5,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "github.com/piipiets/sport-court-booking/docs"
 	"github.com/piipiets/sport-court-booking/handler"
 	"github.com/piipiets/sport-court-booking/middlewares"
 )
@@ -34,6 +38,7 @@ func SetupRoutes(
 		})
 	})
 
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.POST("/login", userHandler.Login)
 	router.POST("/sign-up", userHandler.SignUp)
 
@@ -43,6 +48,7 @@ func SetupRoutes(
 		api.POST("", courtHandler.Create)
 		api.GET("", courtHandler.GetAll)
 		api.GET("/:id", courtHandler.GetByID)
+		api.GET("/:id/image", courtHandler.GetImage)
 		api.PUT("/:id", courtHandler.Update)
 		api.DELETE("/:id", courtHandler.Delete)
 	}

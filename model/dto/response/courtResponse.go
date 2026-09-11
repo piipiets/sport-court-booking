@@ -6,4 +6,5 @@ type CourtResponse struct {
 	Type     string  `json:"type"`
 	Price    float64 `json:"price_per_hour"`
 	Location string  `json:"location"`
+	ImageURL *string `json:"image_url,omitempty"`
 }

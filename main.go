@@ -12,8 +12,17 @@ import (
 	"github.com/piipiets/sport-court-booking/repository"
 	"github.com/piipiets/sport-court-booking/routes"
 	"github.com/piipiets/sport-court-booking/service"
+	"github.com/piipiets/sport-court-booking/storage"
 )
 
+// @title           Sport Court Booking API
+// @version         1.0.0
+// @description     REST API for managing sport courts, bookings, and payments.
+// @host            localhost:8080
+// @BasePath        /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	configs.Initiator()
 
@@ -31,7 +40,12 @@ func main() {
 
 	// service
 	userService := service.NewUserService(userRepository)
-	courtService := service.NewCourtService(courtRepository)
+	courtStorage := storage.NewStorageClient(
+		configs.SupabaseStorageURL(),
+		configs.SupabaseSecretKey(),
+		configs.SupabaseStorageBucket(),
+	)
+	courtService := service.NewCourtService(courtRepository, courtStorage)
 	bookingService := service.NewBookingService(bookingRepository, courtRepository)
 	paymentService := service.NewPaymentService(paymentRepository, bookingRepository)
 

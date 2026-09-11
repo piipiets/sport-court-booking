@@ -59,6 +59,10 @@ Required configuration values:
 DATABASE_URL=<POSTGRES_CONNECTION_URL>
 DB_ENGINE=postgres
 JWT_SECRET_KEY=<JWT_SECRET>
+SUPABASE_URL=<SUPABASE_REST_URL>      # e.g. https://<ref>.supabase.co/rest/v1/
+SUPABASE_SECRET_KEY=<SUPABASE_SERVICE_KEY>
+SUPABASE_STORAGE_BUCKET=<STORAGE_BUCKET>
+SUPABASE_STORAGE_URL=<STORAGE_URL>    # optional, derived from SUPABASE_URL if empty
 ```
 
 Start the service with:
@@ -190,11 +194,12 @@ All paths are relative to `<API_BASE_URL>`. Unless marked **Public**, an endpoin
 
 | Method | Path | Access | Description | Request body |
 | --- | --- | --- | --- | --- |
-| `POST` | `/api/courts` | JWT | Create a court | `name`, `type`, `price_per_hour`, `location` |
+| `POST` | `/api/courts` | Admin JWT | Create a court | `multipart/form-data`: `name`, `type`, `price_per_hour`, `location`, optional `image` (jpg/jpeg/png/webp, max 5MB) |
 | `GET` | `/api/courts` | JWT | List courts | None |
 | `GET` | `/api/courts/:id` | JWT | Get a court by ID | None |
-| `PUT` | `/api/courts/:id` | JWT | Partially update a court | Any of `name`, `type`, `price`, `location` |
-| `DELETE` | `/api/courts/:id` | JWT | Delete a court | None |
+| `GET` | `/api/courts/:id/image` | JWT | Stream the court image from Supabase Storage | None |
+| `PUT` | `/api/courts/:id` | Admin JWT | Partially update a court | `multipart/form-data`: any of `name`, `type`, `price_per_hour`, `location`, optional `image` to replace the court photo |
+| `DELETE` | `/api/courts/:id` | Admin JWT | Delete a court | None |
 
 Supported court types are `futsal` and `badminton`.
 

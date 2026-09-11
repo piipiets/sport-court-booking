@@ -21,7 +21,21 @@ func NewPaymentHandler(paymentService service.PaymentService) *PaymentHandler {
 	return &PaymentHandler{paymentService: paymentService}
 }
 
-// POST /api/payments
+// @Summary      Record a payment
+// @Description  Record a payment for the authenticated user's booking
+// @Tags         Payments
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        request body request.CreatePaymentRequest true "Payment payload"
+// @Success      200 {object} common.APIResponse
+// @Failure      400 {object} common.APIResponse
+// @Failure      401 {object} common.APIResponse
+// @Failure      403 {object} common.APIResponse
+// @Failure      404 {object} common.APIResponse
+// @Failure      409 {object} common.APIResponse
+// @Failure      500 {object} common.APIResponse
+// @Router       /api/payments [post]
 func (h *PaymentHandler) Create(c *gin.Context) {
 	var req request.CreatePaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -57,7 +71,19 @@ func (h *PaymentHandler) Create(c *gin.Context) {
 	common.GenerateSuccessResponse(c, "payment recorded successfully")
 }
 
-// GET /api/payments/:booking_id
+// @Summary      Get payment by booking ID
+// @Description  Retrieve the payment for a specific booking (owner or admin)
+// @Tags         Payments
+// @Security     BearerAuth
+// @Produce      json
+// @Param        booking_id path int true "Booking ID"
+// @Success      200 {object} common.APIResponse{data=response.PaymentResponse}
+// @Failure      400 {object} common.APIResponse
+// @Failure      401 {object} common.APIResponse
+// @Failure      403 {object} common.APIResponse
+// @Failure      404 {object} common.APIResponse
+// @Failure      500 {object} common.APIResponse
+// @Router       /api/payments/{booking_id} [get]
 func (h *PaymentHandler) GetByBookingID(c *gin.Context) {
 	bookingID, err := strconv.ParseInt(c.Param("booking_id"), 10, 64)
 	if err != nil {
@@ -91,7 +117,15 @@ func (h *PaymentHandler) GetByBookingID(c *gin.Context) {
 	common.GenerateSuccessResponseWithData(c, "success", payment)
 }
 
-// GET /api/payments/:booking_id
+// @Summary      Get all payments for the logged-in user
+// @Description  Retrieve all payments for the authenticated user (admins see all)
+// @Tags         Payments
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200 {object} common.APIResponse{data=[]response.PaymentResponse}
+// @Failure      401 {object} common.APIResponse
+// @Failure      500 {object} common.APIResponse
+// @Router       /api/payments [get]
 func (h *PaymentHandler) GetAllPaymentByUserId(c *gin.Context) {
 	userID, err := getUserIDFromContext(c)
 	if err != nil {

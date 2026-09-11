@@ -20,6 +20,16 @@ func NewUserHandler(service service.UserService) *UserHandler {
 	}
 }
 
+// @Summary      User login
+// @Description  Authenticate a user and return a JWT access token
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body request.LoginRequest true "Login credentials"
+// @Success      200 {object} common.APIResponse{data=response.LoginResponse}
+// @Failure      400 {object} common.APIResponse
+// @Failure      401 {object} common.APIResponse
+// @Router       /login [post]
 func (h *UserHandler) Login(c *gin.Context) {
 	var req request.LoginRequest
 
@@ -44,6 +54,15 @@ func (h *UserHandler) Login(c *gin.Context) {
 	common.GenerateSuccessResponseWithData(c, "login successful", result)
 }
 
+// @Summary      User sign up
+// @Description  Create a new user account
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body request.SignUpRequest true "Sign up payload"
+// @Success      200 {object} common.APIResponse
+// @Failure      400 {object} common.APIResponse
+// @Router       /sign-up [post]
 func (h *UserHandler) SignUp(c *gin.Context) {
 	var req request.SignUpRequest
 

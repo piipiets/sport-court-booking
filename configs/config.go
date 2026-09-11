@@ -13,15 +13,14 @@ func Initiator() {
 	// =========================
 	viper.AutomaticEnv()
 
-	if err := viper.BindEnv("DATABASE_URL", "DATABASE_URL", "POSTGRES_URL"); err != nil {
-		panic(err)
-	}
-	if err := viper.BindEnv("DB_ENGINE", "DB_ENGINE"); err != nil {
-		panic(err)
-	}
-	if err := viper.BindEnv("jwt_secret_key", "JWT_SECRET_KEY", "jwt_secret_key"); err != nil {
-		panic(err)
-	}
+	viper.BindEnv("DATABASE_URL", "DATABASE_URL")
+
+	viper.BindEnv("SUPABASE_SECRET_KEY", "SUPABASE_SECRET_KEY")
+	viper.BindEnv("SUPABASE_STORAGE_BUCKET", "SUPABASE_STORAGE_BUCKET")
+	viper.BindEnv("SUPABASE_STORAGE_URL", "SUPABASE_STORAGE_URL")
+	viper.BindEnv("DB_ENGINE", "DB_ENGINE")
+	viper.BindEnv("jwt_secret_key", "JWT_SECRET_KEY", "jwt_secret_key")
+
 	viper.SetDefault("DB_ENGINE", "postgres")
 
 	// =========================
@@ -50,6 +49,9 @@ func Initiator() {
 		"DATABASE_URL",
 		"DB_ENGINE",
 		"jwt_secret_key",
+		"SUPABASE_STORAGE_URL",
+		"SUPABASE_SECRET_KEY",
+		"SUPABASE_STORAGE_BUCKET",
 	}
 
 	for _, env := range requiredEnv {
@@ -62,4 +64,16 @@ func Initiator() {
 	}
 
 	fmt.Println("Successfully loaded configuration")
+}
+
+func SupabaseStorageURL() string {
+	return viper.GetString("SUPABASE_STORAGE_URL")
+}
+
+func SupabaseSecretKey() string {
+	return viper.GetString("SUPABASE_SECRET_KEY")
+}
+
+func SupabaseStorageBucket() string {
+	return viper.GetString("SUPABASE_STORAGE_BUCKET")
 }

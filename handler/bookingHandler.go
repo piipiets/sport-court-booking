@@ -21,7 +21,20 @@ func NewBookingHandler(bookingService service.BookingService) *BookingHandler {
 	return &BookingHandler{bookingService: bookingService}
 }
 
-// POST /api/bookings
+// @Summary      Create a new booking
+// @Description  Create a booking for the authenticated user
+// @Tags         Bookings
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        request body request.CreateBookingRequest true "Booking payload"
+// @Success      200 {object} common.APIResponse
+// @Failure      400 {object} common.APIResponse
+// @Failure      401 {object} common.APIResponse
+// @Failure      404 {object} common.APIResponse
+// @Failure      409 {object} common.APIResponse
+// @Failure      500 {object} common.APIResponse
+// @Router       /api/bookings [post]
 func (h *BookingHandler) Create(c *gin.Context) {
 	var req request.CreateBookingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -52,7 +65,15 @@ func (h *BookingHandler) Create(c *gin.Context) {
 	common.GenerateSuccessResponse(c, "booking created successfully")
 }
 
-// GET /api/bookings — booking milik user yang login
+// @Summary      Get all bookings for the logged-in user
+// @Description  Retrieve all bookings associated with the logged-in user
+// @Tags         Bookings
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200 {object} common.APIResponse{data=[]response.BookingResponse}
+// @Failure      400 {object} common.APIResponse
+// @Failure      500 {object} common.APIResponse
+// @Router       /api/bookings [get]
 func (h *BookingHandler) GetAll(c *gin.Context) {
 	userID, err := getUserIDFromContext(c)
 	if err != nil {
@@ -69,7 +90,18 @@ func (h *BookingHandler) GetAll(c *gin.Context) {
 	common.GenerateSuccessResponseWithData(c, "success", bookings)
 }
 
-// GET /api/bookings/:id
+// @Summary      Get a booking by ID
+// @Description  Retrieve a specific booking by its ID
+// @Tags         Bookings
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id path int true "Booking ID"
+// @Success      200 {object} common.APIResponse{data=response.BookingResponse}
+// @Failure      400 {object} common.APIResponse
+// @Failure      403 {object} common.APIResponse
+// @Failure      404 {object} common.APIResponse
+// @Failure      500 {object} common.APIResponse
+// @Router       /api/bookings/{id} [get]
 func (h *BookingHandler) GetByID(c *gin.Context) {
 	id, err := parseBookingID(c)
 	if err != nil {
@@ -101,7 +133,21 @@ func (h *BookingHandler) GetByID(c *gin.Context) {
 	common.GenerateSuccessResponseWithData(c, "success", booking)
 }
 
-// PUT /api/bookings/:id/status — admin only
+// PUT /api/bookings/status/:id — admin only
+// @Summary      Update booking status
+// @Description  Update a booking status (admin only)
+// @Tags         Bookings
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id path int true "Booking ID"
+// @Param        request body request.UpdateBookingStatusRequest true "New status"
+// @Success      200 {object} common.APIResponse
+// @Failure      400 {object} common.APIResponse
+// @Failure      403 {object} common.APIResponse
+// @Failure      404 {object} common.APIResponse
+// @Failure      500 {object} common.APIResponse
+// @Router       /api/bookings/status/{id} [put]
 func (h *BookingHandler) UpdateStatus(c *gin.Context) {
 	id, err := parseBookingID(c)
 	if err != nil {
