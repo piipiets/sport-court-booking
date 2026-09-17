@@ -9,6 +9,7 @@ import (
 	"github.com/piipiets/sport-court-booking/databases/connection"
 	"github.com/piipiets/sport-court-booking/databases/migration"
 	"github.com/piipiets/sport-court-booking/handler"
+	"github.com/piipiets/sport-court-booking/middlewares"
 	"github.com/piipiets/sport-court-booking/repository"
 	"github.com/piipiets/sport-court-booking/routes"
 	"github.com/piipiets/sport-court-booking/service"
@@ -57,6 +58,7 @@ func main() {
 
 	// router
 	router := gin.Default()
+	router.Use(middlewares.CorsMiddleware())
 
 	// routes
 	routes.SetupRoutes(

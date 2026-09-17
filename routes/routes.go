@@ -20,6 +20,8 @@ func SetupRoutes(
 	bookHandler *handler.BookingHandler,
 	paymentHandler *handler.PaymentHandler,
 ) {
+	router.Use(middlewares.CorsMiddleware())
+
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Sport Court Booking API",
